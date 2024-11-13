@@ -1,0 +1,6 @@
+dsets/t10k-labels.idx1-ubyte filter=lfs diff=lfs merge=lfs -text
+dsets/train-images.idx3-ubyte filter=lfs diff=lfs merge=lfs -text
+dsets/train-labels.idx1-ubyte filter=lfs diff=lfs merge=lfs -text
+PercepTron/dataset/t10k-labels.idx1-ubyte filter=lfs diff=lfs merge=lfs -text
+PercepTron/dataset/train-images.idx3-ubyte filter=lfs diff=lfs merge=lfs -text
+PercepTron/dataset/train-labels.idx1-ubyte filter=lfs diff=lfs merge=lfs -text

@@ -1,0 +1,80 @@
+#include <stdio.h>
+@kernel
+void
+T(float* origin, float* out, unsigned int Xsize, unsigned int Ysize)
+{
+    for(unsigned int o_itr=0; o_itr < Xsize * Ysize; o_itr += 64; @outer){
+        for(unsigned int i_itr=0; i_itr<64; ++i_itr; @inner){
+            unsigned int Dim1IDX = o_itr + i_itr;
+            if(Dim1IDX < Xsize * Ysize){//Divergence...
+                unsigned int originX = Dim1IDX % Xsize;
+                unsigned int originY = Dim1IDX / Xsize;
+                out[originY + (originX * Ysize)]
+                = origin[originX + (originY * Xsize)];
+            }
+        }
+    }
+}
+
+@kernel
+void
+DOT_front(
+    float* A, 
+    unsigned int Xsize, 
+    unsigned int AYsize,
+    float* B_T, 
+    unsigned int BYsize,
+    float* O
+    )
+{
+    
+    for(unsigned int o_itr=0; o_itr < (Xsize * AYsize * BYsize); o_itr += 64; @outer){
+        for(unsigned int i_itr=0; i_itr<64; ++i_itr; @inner){
+            unsigned int Dim1IDX = o_itr + i_itr;
+            unsigned int lineSize = Xsize * BYsize;
+            if(Dim1IDX < (Xsize * BYsize * AYsize)){
+                unsigned int ITR= Dim1IDX % Xsize;
+                unsigned int OX = (Dim1IDX / Xsize) % BYsize;
+                unsigned int OY = Dim1IDX / lineSize;
+                O[Dim1IDX] = A[ITR + (Xsize * OY)] * B_T[ITR + (BYsize * OX)];
+            }
+        }
+    }
+}
+
+
+
+@kernel
+void
+DOT_back1024(
+    float* O,
+    float* res,
+    unsigned int numIdx,
+    unsigned int segment
+    )
+{
+    for(unsigned int o_itr=0; o_itr < numIdx; ++o_itr; @outer){
+        @shared float first_mem[1024];
+        @shared float second_mem[1024];
+        for(unsigned int i_itr=0; i_itr<1024; ++i_itr; @inner){
+            unsigned int GIDX = o_itr + i_itr;
+            bool usable = i_itr < segment;
+            first_mem[i_itr] = O[(o_itr * segment + i_itr) * usable] * usable;
+        }
+        
+        for(unsigned int i_itr=0; i_itr<1024; ++i_itr; @inner){
+        
+            bool usable = i_itr < 512;
+            unsigned int RightIdx = (i_itr + 512) * usable;
+            second_mem[i_itr] = (first_mem[i_itr] + first_mem[RightIdx]) * usable;
+        }
+        for(unsigned int i_itr=0; i_itr<1024; ++i_itr; @inner){
+            bool usable = i_itr < 256;
+            unsigned int RightIdx = (i_itr + 256) * usable;
+            @atomic res[o_itr] += (second_mem[i_itr] + second_mem[RightIdx]) * usable;
+        }
+        // for(unsigned int i_itr=0; i_itr<1024; ++i_itr; @inner){
+        //     O[o_itr] = val[0];
+        // }
+    }
+}
