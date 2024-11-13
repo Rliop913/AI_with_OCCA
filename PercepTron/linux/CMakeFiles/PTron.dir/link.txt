@@ -1,0 +1,1 @@
+/usr/bin/clang++ -g CMakeFiles/PTron.dir/dataset/data_reader.cpp.o CMakeFiles/PTron.dir/model/Perceptron.cpp.o CMakeFiles/PTron.dir/main.cpp.o -o PTron  -Wl,-rpath,/usr/local/lib /usr/local/lib/libocca.so
