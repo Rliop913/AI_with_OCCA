@@ -1,3 +1,0 @@
-/home/rrop/rropdb/aiHistory/PercepTron/linux/CMakeFiles/PTron.dir
-/home/rrop/rropdb/aiHistory/PercepTron/linux/CMakeFiles/edit_cache.dir
-/home/rrop/rropdb/aiHistory/PercepTron/linux/CMakeFiles/rebuild_cache.dir
